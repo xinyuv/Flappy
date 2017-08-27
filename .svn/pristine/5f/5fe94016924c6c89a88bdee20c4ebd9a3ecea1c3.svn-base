@@ -1,0 +1,166 @@
+package com.xinyuli.flappy.gameobjects;
+
+import com.xinyuli.flappy.gameworlds.GameWorld;
+import com.xinyuli.flappy.utils.AssetLoader;
+import com.xinyuli.flappy.utils.Constants;
+
+/**
+ * Created by xinyuli on 11/04/2017.
+ * <p>
+ * ScrollHandler.
+ */
+
+public class ScrollHandler {
+
+    private static final int SCROLL_SPEED = -140;
+    private static final int SCROLL_SPEED_SLOW = -100;
+    private static final int GROUND_Y_OFFSET = -50;
+    private static final int TUBE_SPACING = 125;
+
+    private City city1, city2;
+    private Ground ground1, ground2;
+    private Tube tube1, tube2, tube3;
+
+    private int scrollSpeed;
+
+    private GameWorld world;
+
+    public ScrollHandler(GameWorld world, boolean touchMode) {
+
+        scrollSpeed = touchMode ? SCROLL_SPEED : SCROLL_SPEED_SLOW;
+
+        this.world = world;
+        city1 = new City(0, 0, Constants.BG_WIDTH, Constants.BG_HEIGHT, scrollSpeed / 5);
+
+        city2 = new City(city1.getTailX(), 0, Constants.BG_WIDTH, Constants.BG_HEIGHT,
+                scrollSpeed / 5);
+
+        ground1 = new Ground(0, GROUND_Y_OFFSET, Constants.GROUND_WIDTH,
+                Constants.GROUND_HEIGHT, scrollSpeed);
+        ground2 = new Ground(ground1.getTailX(), GROUND_Y_OFFSET, Constants.GROUND_WIDTH,
+                Constants.GROUND_HEIGHT, scrollSpeed);
+
+        tube1 = new Tube(Constants.GAME_WIDTH / 2, 0, Constants.TUBE_WIDTH, Constants.TUBE_HEIGHT,
+                scrollSpeed, touchMode);
+        tube2 = new Tube(tube1.getTailX() + TUBE_SPACING, 0, Constants.TUBE_WIDTH,
+                Constants.TUBE_HEIGHT, scrollSpeed, touchMode);
+        tube3 = new Tube(tube2.getTailX() + TUBE_SPACING, 0, Constants.TUBE_WIDTH,
+                Constants.TUBE_HEIGHT, scrollSpeed, touchMode);
+    }
+
+    /**
+     * Reset tubes and grounds when one is out of the screen.
+     */
+    public void update(float dt) {
+        city1.update(dt);
+        city2.update(dt);
+        ground1.update(dt);
+        ground2.update(dt);
+        tube1.update(dt);
+        tube2.update(dt);
+        tube3.update(dt);
+
+        // Check if any of the pipes are scrolled left,
+        // and reset accordingly
+        if (tube1.isScrolledLeft()) {
+            tube1.reset(tube3.getTailX() + TUBE_SPACING);
+        } else if (tube2.isScrolledLeft()) {
+            tube2.reset(tube1.getTailX() + TUBE_SPACING);
+        } else if (tube3.isScrolledLeft()) {
+            tube3.reset(tube2.getTailX() + TUBE_SPACING);
+        }
+
+        // Same with grass
+        if (ground1.isScrolledLeft()) {
+            ground1.reset(ground2.getTailX());
+        } else if (ground2.isScrolledLeft()) {
+            ground2.reset(ground1.getTailX());
+        }
+
+        if (city1.isScrolledLeft()) {
+            city1.reset(city2.getTailX());
+        } else if (city2.isScrolledLeft()) {
+            city2.reset(city1.getTailX());
+        }
+    }
+
+    /**
+     * Call all scrollable 's onRestart.
+     */
+    public void onRestart(boolean touchMode) {
+        scrollSpeed = touchMode ? SCROLL_SPEED : SCROLL_SPEED_SLOW;
+
+        city1.onRestart(0, scrollSpeed / 5);
+        city2.onRestart(city1.getTailX(), scrollSpeed / 5);
+        ground1.onRestart(0, scrollSpeed);
+        ground2.onRestart(ground1.getTailX(), scrollSpeed);
+        tube1.onRestart(Constants.GAME_WIDTH / 2, scrollSpeed, touchMode);
+        tube2.onRestart(tube1.getTailX() + TUBE_SPACING, scrollSpeed, touchMode);
+        tube3.onRestart(tube2.getTailX() + TUBE_SPACING, scrollSpeed, touchMode);
+    }
+
+    /**
+     * Call all scrollable 's stop.
+     */
+    public void stop() {
+        city1.stop();
+        city2.stop();
+        ground1.stop();
+        ground2.stop();
+        tube1.stop();
+        tube2.stop();
+        tube3.stop();
+    }
+
+    /**
+     * Check for collision and check scores.
+     * @return if bird collides with any of the tubes.
+     */
+    public boolean collides(Bird bird) {
+        if (!tube1.isScored() &&
+                tube1.getX() + tube1.getWidth() / 2 < bird.getX() + bird.getWidth()) {
+            world.addScore(1);
+            tube1.setScored();
+            AssetLoader.point.play(0.5f);
+        } else if (!tube2.isScored() &&
+                tube2.getX() + tube2.getWidth() / 2 < bird.getX() + bird.getWidth()) {
+            world.addScore(1);
+            tube2.setScored();
+            AssetLoader.point.play(0.5f);
+        } else if (!tube3.isScored() &&
+                tube3.getX() + tube3.getWidth() / 2 < bird.getX() + bird.getWidth()) {
+            world.addScore(1);
+            tube3.setScored();
+            AssetLoader.point.play(0.5f);
+        }
+        return tube1.collides(bird) || tube2.collides(bird) || tube3.collides(bird);
+    }
+
+    public City getCity1() {
+        return city1;
+    }
+
+    public City getCity2() {
+        return city2;
+    }
+
+    public Ground getGround1() {
+        return ground1;
+    }
+
+    public Ground getGround2() {
+        return ground2;
+    }
+
+    public Tube getTube1() {
+        return tube1;
+    }
+
+    public Tube getTube2() {
+        return tube2;
+    }
+
+    public Tube getTube3() {
+        return tube3;
+    }
+}

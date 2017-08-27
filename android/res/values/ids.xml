@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Google Play game services IDs.
+Save this file as res/values/games-ids.xml in your project.
+-->
+<resources>
+    <string name="app_id">994352214423</string>
+    <string name="package_name">com.xinyuli.flappy</string>
+    <string name="leaderboard_flappy">CgkIl-OKoPgcEAIQAA</string>
+</resources>

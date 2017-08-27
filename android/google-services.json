@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "39640850477",
+    "firebase_url": "https://flappy-ab525.firebaseio.com",
+    "project_id": "flappy-ab525",
+    "storage_bucket": "flappy-ab525.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39640850477:android:e5cf98281efda917",
+        "android_client_info": {
+          "package_name": "com.xinyuli.flappy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "39640850477-v5aiqnoic1ogbf91u9pigscepagcelmm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xinyuli.flappy",
+            "certificate_hash": "2fd7125ac68053c1779a84a4dadb85c03276a225"
+          }
+        },
+        {
+          "client_id": "39640850477-uj6v5souru6skkfs8lt61o4b8e7p8p14.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4pffHsr6CH_aaCWFDwsDZeoXb5Qna3iM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "39640850477-uj6v5souru6skkfs8lt61o4b8e7p8p14.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

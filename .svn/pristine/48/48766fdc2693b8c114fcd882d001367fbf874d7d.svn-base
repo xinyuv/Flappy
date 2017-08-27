@@ -1,0 +1,137 @@
+package com.xinyuli.flappy.gameworlds;
+
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
+import com.xinyuli.flappy.gameobjects.Bird;
+import com.xinyuli.flappy.gameobjects.ScrollHandler;
+import com.xinyuli.flappy.utils.AssetLoader;
+import com.xinyuli.flappy.utils.Constants;
+
+/**
+ * Created by xinyuli on 09/04/2017.
+ *
+ * Our cute city.
+ */
+
+public class GameWorld {
+
+    public enum GameState {
+        READY, RUNNING, GAMEOVER, HIGHSCORE
+    }
+
+    private Bird bird;
+    private Rectangle ground;
+    private static final int GROUND_Y_OFFSET = -50;
+    private ScrollHandler scrollHandler;
+    private int midY;
+
+    private int score= 0;
+
+    private GameState currState;
+
+
+    public GameWorld(int midY) {
+        currState = GameState.READY;
+        this.midY = midY;
+        bird = new Bird(50, midY + 5);
+        ground = new Rectangle(0, GROUND_Y_OFFSET, Constants.GROUND_WIDTH, Constants.GROUND_HEIGHT);
+        scrollHandler = new ScrollHandler(this);
+    }
+
+    /**
+     * Update based on current game state.
+     * @param dt Delta time.
+     */
+    public void update(float dt) {
+        switch (currState) {
+            case READY:
+                updateReady(dt);
+                break;
+            case RUNNING:
+                AssetLoader.font.getData().setScale(0.5f);
+                AssetLoader.shadow.getData().setScale(0.5f);
+                updateRunning(dt);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Start the game with running state.
+     */
+    public void start() {
+        currState = GameState.RUNNING;
+    }
+
+    /**
+     * Restart the game to ready state.
+     */
+    public void restart() {
+        score = 0;
+        bird.onRestart(50, midY + 5);
+        scrollHandler.onRestart();
+        currState = GameState.READY;
+    }
+
+    private void updateReady(float dt) {
+
+    }
+
+    /**
+     * Update bird and scroll handler. Handle collision cases.
+     * @param dt Delta time.
+     */
+    private void updateRunning(float dt) {
+        bird.update(dt);
+        scrollHandler.update(dt);
+        if (scrollHandler.collides(bird) && bird.isAlive()) {
+            scrollHandler.stop();
+            bird.die();
+            AssetLoader.hit.play(0.5f);
+        }
+        if (Intersector.overlaps(bird.getBoundingCircle(), ground)) {
+            scrollHandler.stop();
+            bird.die();
+            bird.decelerate();
+            AssetLoader.die.play(0.5f);
+            currState = GameState.GAMEOVER;
+            if (score > AssetLoader.getHighScore()) {
+                AssetLoader.setHighScore(score);
+                currState = GameState.HIGHSCORE;
+            }
+        }
+    }
+
+    public Bird getBird() {
+        return bird;
+    }
+
+    public ScrollHandler getScrollHandler() {
+        return scrollHandler;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void addScore(int incre) {
+        score += incre;
+    }
+
+    public boolean isReady() {
+        return currState == GameState.READY;
+    }
+
+    public boolean isRunning() {
+        return currState == GameState.RUNNING;
+    }
+
+    public boolean isGameOver() {
+        return currState == GameState.GAMEOVER;
+    }
+
+    public boolean isHighScore() {
+        return currState == GameState.HIGHSCORE;
+    }
+}

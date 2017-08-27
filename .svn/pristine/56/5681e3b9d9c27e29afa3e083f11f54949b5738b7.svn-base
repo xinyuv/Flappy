@@ -1,0 +1,101 @@
+package com.xinyuli.flappy.gameobjects;
+
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
+import com.xinyuli.flappy.utils.AssetLoader;
+import com.xinyuli.flappy.utils.Constants;
+
+import java.util.Random;
+
+/**
+ * Created by xinyuli on 11/04/2017.
+ *
+ * Green tubes.
+ */
+
+public class Tube extends Scrollable {
+
+    private Random rand;
+    private static final int TUBE_GAP = 90;
+    private static final int FLUCTUATION = 130;         // move up/down randomly between 0 - 130
+    private static final int LOWEST_OPENING = 120;
+
+    private Rectangle topTube, botTube;
+
+    private boolean isScored = false;
+
+
+    public Tube(float x, float y, int width, int height, float scrollSpeed) {
+        super(x, y, width, height, scrollSpeed);
+        rand = new Random();
+        position.y = rand.nextInt(FLUCTUATION) + TUBE_GAP + LOWEST_OPENING;
+        topTube = new Rectangle();
+        botTube = new Rectangle();
+    }
+
+    /**
+     * Reset the tube to the new X position. Y position are random chosen.
+     * @param newX New x position.
+     */
+    @Override
+    public void reset(float newX) {
+        super.reset(newX);
+        position.y = rand.nextInt(FLUCTUATION) + TUBE_GAP + LOWEST_OPENING;
+        isScored = false;
+    }
+
+    /**
+     * Update tube locations.
+     * @param dt Delta time.
+     */
+    @Override
+    public void update(float dt) {
+        super.update(dt);
+        topTube.set(position.x, position.y, width, height);
+        botTube.set(position.x, getBotY(), width, height);
+    }
+
+    @Override
+    public void onRestart(float x, float scrollSpeed) {
+        super.onRestart(x, scrollSpeed);
+        reset(x);
+    }
+
+    /**
+     * @return if bird overlaps the tubes.
+     */
+    public boolean collides(Bird bird) {
+        // check for the tubes in the screen
+        if (position.x >= 0 && position.x <= Constants.GAME_WIDTH) {
+            return Intersector.overlaps(bird.getBoundingCircle(), topTube)
+                    || Intersector.overlaps(bird.getBoundingCircle(), botTube);
+        }
+        return false;
+    }
+
+    /**
+     * @return The position of the bottom tube.
+     */
+    public float getBotY() {
+        return position.y - TUBE_GAP - AssetLoader.botTube.getHeight();
+    }
+
+    public Rectangle getTopTube() {
+        return topTube;
+    }
+
+    public Rectangle getBotTube() {
+        return botTube;
+    }
+
+    /**
+     * @return if this tube has already been passed by the bird.
+     */
+    public boolean isScored() {
+        return isScored;
+    }
+
+    public void setScored() {
+        isScored = true;
+    }
+}

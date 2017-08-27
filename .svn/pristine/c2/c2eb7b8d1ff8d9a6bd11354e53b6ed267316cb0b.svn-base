@@ -1,0 +1,154 @@
+package com.xinyuli.flappy.gameworlds;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.xinyuli.flappy.gameobjects.Bird;
+import com.xinyuli.flappy.gameobjects.Ground;
+import com.xinyuli.flappy.gameobjects.ScrollHandler;
+import com.xinyuli.flappy.gameobjects.Tube;
+import com.xinyuli.flappy.utils.AssetLoader;
+import com.xinyuli.flappy.utils.Constants;
+
+/**
+ * Created by xinyuli on 09/04/2017.
+ * <p>
+ * Renders the game attributes.
+ */
+
+public class GameRenderer {
+
+    private GameWorld world;
+    private OrthographicCamera cam;
+    private ShapeRenderer shapeRenderer;
+
+    private SpriteBatch batch;
+
+    private Bird bird;
+    private ScrollHandler scrollHandler;
+    private Ground ground1, ground2;
+    private Tube tube1, tube2, tube3;
+
+    private Texture bg, ground, topTube, botTube, splash, scoreBoard;
+    private TextureRegion birdRegion;
+
+    private Animation<TextureRegion> birdAnimation;
+
+
+    public GameRenderer(GameWorld world) {
+        this.world = world;
+        cam = new OrthographicCamera();
+        cam.setToOrtho(false, Constants.GAME_WIDTH / 2, Constants.GAME_HEIGHT / 2);
+
+        batch = new SpriteBatch();
+        batch.setProjectionMatrix(cam.combined);
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setProjectionMatrix(cam.combined);
+
+        initGameObjects();
+        initAssets();
+    }
+
+    /**
+     * Render all the objects to the screen.
+     */
+    public void render(float dt) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+        batch.disableBlending();        // no transparency needed
+        batch.draw(bg, 0, 0);
+
+        batch.enableBlending();
+
+        drawTube();
+        drawGround();
+        if (bird.shouldFlap()) {
+            batch.draw(birdAnimation.getKeyFrame(dt), bird.getX(), bird.getY(),
+                    bird.getWidth() / 2, bird.getHeight() / 2,
+                    bird.getWidth(), bird.getHeight(), 1, 1, bird.getRotation());
+        } else {
+            batch.draw(birdRegion, bird.getX(), bird.getY(),
+                    bird.getWidth() / 2, bird.getHeight() / 2,
+                    bird.getWidth(), bird.getHeight(), 1, 1, bird.getRotation());
+        }
+
+        if (world.isReady()) {
+            batch.draw(splash, cam.position.x -  (int) (splash.getWidth() * 0.35),
+                    cam.position.y - (int) (splash.getHeight() * 0.25),
+                    (int) (splash.getWidth() * 0.7), (int) (splash.getHeight() * 0.7));
+        } else if (world.isRunning()) {
+            String score = world.getScore() + "";
+            AssetLoader.shadow.draw(batch, score, cam.position.x - score.length() * 10,
+                    cam.viewportHeight * 3 / 4);
+            AssetLoader.font.draw(batch, score, cam.position.x - score.length() * 10 - 1,
+                    cam.viewportHeight * 3 / 4 - 1);
+        } else {
+            batch.draw(scoreBoard, cam.position.x - (int) (scoreBoard.getWidth() * 0.35),
+                    cam.position.y - (int) (scoreBoard.getHeight() * 0.35),
+                    (int) (scoreBoard.getWidth() * 0.7), (int) (scoreBoard.getHeight() * 0.7));
+            String highScore = AssetLoader.getHighScore() + "";
+            String score = world.getScore() + "";
+            AssetLoader.font.getData().setScale(0.25f);
+            AssetLoader.shadow.getData().setScale(0.25f);
+            AssetLoader.shadow.draw(batch, score, cam.position.x + 50, cam.position.y + 25);
+            AssetLoader.font.draw(batch, score, cam.position.x + 50 - 1, cam.position.y + 24);
+            AssetLoader.shadow.draw(batch, highScore, cam.position.x + 50, cam.position.y - 8);
+            AssetLoader.font.draw(batch, highScore, cam.position.x + 50 - 1, cam.position.y - 9);
+        }
+
+        batch.end();
+    }
+
+    /**
+     * Initialize the game objects.
+     */
+    private void initGameObjects() {
+        bird = world.getBird();
+        scrollHandler = world.getScrollHandler();
+        ground1 = scrollHandler.getGround1();
+        ground2 = scrollHandler.getGround2();
+        tube1 = scrollHandler.getTube1();
+        tube2 = scrollHandler.getTube2();
+        tube3 = scrollHandler.getTube3();
+    }
+
+    /**
+     * Get the assets from the AssetLoder.
+     */
+    private void initAssets() {
+        bg = AssetLoader.bg;
+        ground = AssetLoader.ground;
+        splash = AssetLoader.splash;
+        scoreBoard = AssetLoader.scoreBoard;
+        topTube = AssetLoader.topTube;
+        botTube = AssetLoader.botTube;
+        birdRegion = AssetLoader.birdRegion;
+        birdAnimation = AssetLoader.birdAnimation;
+    }
+
+    private void drawGround() {
+        batch.draw(ground, ground1.getX(), ground1.getY());
+        batch.draw(ground, ground2.getX(), ground2.getY());
+    }
+
+    private void drawTube() {
+        batch.draw(topTube, tube1.getX(), tube1.getY());
+        batch.draw(botTube, tube1.getX(), tube1.getBotY());
+
+        batch.draw(topTube, tube2.getX(), tube2.getY());
+        batch.draw(botTube, tube2.getX(), tube2.getBotY());
+
+        batch.draw(topTube, tube3.getX(), tube3.getY());
+        batch.draw(botTube, tube3.getX(), tube3.getBotY());
+    }
+
+}
